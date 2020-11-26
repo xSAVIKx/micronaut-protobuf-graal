@@ -26,16 +26,43 @@
 
 package com.yurisergiichuk.graalvm;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.TextFormat;
+import com.google.protobuf.util.JsonFormat;
+import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Get;
 import io.micronaut.protobuf.codec.ProtobufferCodec;
 
-@Controller("/proto")
+@Controller("/example")
 final class ProtoController {
 
-    @Get(produces = ProtobufferCodec.PROTOBUFFER_ENCODED)
-    ProtobufExampleReply handle() {
-        var response = ProtobufExampleReply.newBuilder().setMessage("OK").build();
+    @Get(value = "proto", produces = ProtobufferCodec.PROTOBUFFER_ENCODED)
+    ProtobufExampleReply proto() {
+        var response = ProtobufExampleReply
+                .newBuilder()
+                .setMessage("proto")
+                .build();
+        return response;
+    }
+
+    @Get(value = "json", produces = MediaType.APPLICATION_JSON)
+    String json() throws InvalidProtocolBufferException {
+        var proto = ProtobufExampleReply
+                .newBuilder()
+                .setMessage("json")
+                .build();
+        var response = JsonFormat.printer().print(proto);
+        return response;
+    }
+
+    @Get(value = "text", produces = MediaType.TEXT_PLAIN)
+    String text() {
+        var proto = ProtobufExampleReply
+                .newBuilder()
+                .setMessage("json")
+                .build();
+        var response = TextFormat.printer().printToString(proto);
         return response;
     }
 }
