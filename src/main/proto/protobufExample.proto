@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.yurisergiichuk.graalvm";
+option java_outer_classname = "ProtobufExample";
+option objc_class_prefix = "HLW";
+
+package com.yurisergiichuk.graalvm;
+
+message ProtobufExampleRequest {
+  string name = 1;
+}
+
+message ProtobufExampleReply {
+  string message = 1;
+}

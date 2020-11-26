@@ -1,0 +1,6 @@
+applicationType: grpc
+defaultPackage: com.yurisergiichuk.graalvm
+testFramework: junit
+sourceLanguage: java
+buildTool: gradle_kotlin
+features: [annotation-api, app-name, github-workflow-graal-docker-registry, graalvm, gradle, grpc, java, java-application, junit, logback, readme, shade, yaml]
