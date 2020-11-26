@@ -48,6 +48,6 @@ the following Gradle command:
 
 When the image is built, you can simply run it as any other binary. The `application` executable
 should be available under the `build/native-image` folder.
-Also a runnable fat JAR file should be available under the `build/libs` folder.
+Also, a runnable fat JAR file should be available under the `build/libs` folder.
 
 You can find the pre-built binaries in the [`bin`](./bin) folder.
