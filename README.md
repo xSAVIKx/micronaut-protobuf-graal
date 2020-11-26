@@ -1,59 +1,53 @@
-## Push GraalVM Native Image To Docker Registry Workflow
-Workflow builds docker image with name `"${System.env.DOCKER_REGISTRY_URL}/${System.env.DOCKER_ORGANIZATION}/protobuf-example:@project.version"` and pushes the image
-into configured docker registry.
+Micronaut Protobuf GraalVM example
+-------
 
-The GitHub secrets in table below needs to be configured:
+This repository contains an example Micronaut-based project that works with Protobuf and 
+successfully compiles into a GraalVM Native Image.
 
-| Name | Description |
-| ---- | ----------- |
-| DOCKER_USERNAME | Username for Docker registry authentication. |
-| DOCKER_PASSWORD | Docker registry password. |
-| DOCKER_ORGANIZATION | Path to the docker image registry, e.g. for image `foo/bar/micronaut:0.1` it is `foo/bar`. |
-| DOCKER_REGISTRY_URL | Docker registry url. |
-### Examples of configuration
-> Specifics on how to configure public cloud docker registries like DockerHub, Google Container Registry (GCR), AWS Container Registry (ECR),
-> Oracle Cloud Infrastructure Registry (OCIR) and many more can be found in [docker/login-action](https://github.com/docker/login-action)
-> documentation.
+# How to build a native image
 
-#### DockerHub
+First, install and configure a GraalVM itself and install the `native-image` plugin.
 
-- `DOCKER_USERNAME` - DockerHub username
-- `DOCKER_PASSWORD` - DockerHub password or personal access token
-- `DOCKER_ORGANIZATION` - DockerHub organization or the username in case of personal registry
-- `DOCKER_REGISTRY_URL` - No need to configure for DockerHub
+Here is an example of how it could be done:
 
-> See [docker/login-action for GCR](https://github.com/docker/login-action#dockerhub)
+```bash
+GRAALVM_VERSION="20.2.0"
+JAVA_VERSION="11"
+GRAALVM="graalvm-ce-java${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}"
+GRAALVM_ARCHIVE="${GRAALVM}.tar.gz"
+GRAALVM_JAVA="graalvm-ce-java${JAVA_VERSION}-${GRAALVM_VERSION}"
 
-#### Google Container Registry (GCR)
-Create service account with permission to edit GCR or use predefined Storage Admin role.
+wget "https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/${GRAALVM_ARCHIVE}"
 
-- `DOCKER_USERNAME` - set exactly to `_json_key`
-- `DOCKER_PASSWORD` - content of the service account json key file
-- `DOCKER_ORGANIZATION` - `<project-id>`
-- `DOCKER_REGISTRY_URL` - `gcr.io`
+tar -xvzf "${GRAALVM_ARCHIVE}"
 
-> See [docker/login-action for GCR](https://github.com/docker/login-action#google-container-registry-gcr)
+sudo mkdir /usr/lib/jvm
+sudo mv "${GRAALVM_JAVA}" /usr/lib/jvm
+rm "${GRAALVM_ARCHIVE}"
 
-#### AWS Elastic Container Registry (ECR)
-Create IAM user with permission to push to ECR (or use AmazonEC2ContainerRegistryFullAccess role).
 
-- DOCKER_USERNAME - access key ID
-- DOCKER_PASSWORD - secret access key
-- DOCKER_ORGANIZATION - no need to set
-- DOCKER_REGISTRY_URL - set to `<aws-account-number>.dkr.ecr.<region>.amazonaws.com`
+JAVA_SDK_PATH="/usr/lib/jvm/${GRAALVM_JAVA}"
+sudo bash -c "echo \"export JAVA_HOME=${JAVA_SDK_PATH}\" >> /etc/profile.d/graalvm.sh"
+sudo bash -c "echo \"export PATH=${JAVA_SDK_PATH}/bin:\\\$PATH\" >> /etc/profile.d/graalvm.sh"
 
-> See [docker/login-action for ECR](https://github.com/docker/login-action#aws-elastic-container-registry-ecr)
+source /etc/profile.d/graalvm.sh
 
-#### Oracle Infrastructure Cloud Registry (OCIR)
-[Create auth token](https://www.oracle.com/webfolder/technetwork/tutorials/obe/oci/registry/index.html#GetanAuthToken) for authentication.
+## Install Native Image using GVM `gu` utility
 
-- DOCKER_USERNAME - username in format `<tenancy>/<username>`
-- DOCKER_PASSWORD - account auth token
-- DOCKER_ORGANIZATION - `<tenancy>/<registry>`
-- DOCKER_REGISTRY_URL - set to `<aws-account-number>.dkr.ecr.<region>.amazonaws.com`
+gu install native-image
+```
 
-> See [docker/login-action for OCIR](https://github.com/docker/login-action#oci-oracle-cloud-infrastructure-registry-ocir)
-## Feature github-workflow-graal-docker-registry documentation
+With GraalVM installed and configured, run the Native Image compilation using 
+the following Gradle command:
 
-- [https://docs.github.com/en/free-pro-team@latest/actions](https://docs.github.com/en/free-pro-team@latest/actions)
+```bash
+./gradlew clean build nativeImage
+```
 
+# Running locally
+
+When the image is built, you can simply run it as any other binary. The `application` executable
+should be available under the `build/native-image` folder.
+Also a runnable fat JAR file should be available under the `build/libs` folder.
+
+You can find the pre-built binaries in the [`bin`](./bin) folder.
