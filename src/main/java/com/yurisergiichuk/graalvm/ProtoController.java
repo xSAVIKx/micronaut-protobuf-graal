@@ -26,6 +26,7 @@
 
 package com.yurisergiichuk.graalvm;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.TextFormat;
 import com.google.protobuf.util.JsonFormat;
@@ -46,6 +47,9 @@ final class ProtoController {
         return response;
     }
 
+    /**
+     * Calling this method from the Native Image fails with "missing method 'getMessage'" exception.
+     */
     @Get(value = "json", produces = MediaType.APPLICATION_JSON)
     String json() throws InvalidProtocolBufferException {
         var proto = ProtobufExampleReply
@@ -56,6 +60,9 @@ final class ProtoController {
         return response;
     }
 
+    /**
+     * Calling this method from the Native Image fails with "missing method 'getMessage'" exception.
+     */
     @Get(value = "text", produces = MediaType.TEXT_PLAIN)
     String text() {
         var proto = ProtobufExampleReply
@@ -63,6 +70,19 @@ final class ProtoController {
                 .setMessage("json")
                 .build();
         var response = TextFormat.printer().printToString(proto);
+        return response;
+    }
+
+    /**
+     * Calling this method from the Native Image fails with "missing method 'getMessage'" exception.
+     */
+    @Get(value = "any", produces = ProtobufferCodec.PROTOBUFFER_ENCODED)
+    Any any() {
+        var proto = ProtobufExampleReply
+                .newBuilder()
+                .setMessage("json")
+                .build();
+        var response = Any.pack(proto);
         return response;
     }
 }
